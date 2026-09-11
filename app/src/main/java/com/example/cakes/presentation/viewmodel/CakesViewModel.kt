@@ -50,31 +50,4 @@ class CakesViewModel @Inject constructor(
         }
     }
 
-//    fun loadCakes() {
-//        viewModelScope.launch {
-//            _uiState.update {
-//                it.copy(
-//                    isLoading = true,
-//                    error = null
-//                )
-//            }
-//            try {
-//                val cakes = repository.getCakes()
-//
-//                _uiState.update {
-//                    it.copy(
-//                        isLoading = false,
-//                        cakes = cakes
-//                    )
-//                }
-//            } catch (e: Exception) {
-//                _uiState.update {
-//                    it.copy(
-//                        isLoading = false,
-//                        error = e.message
-//                    )
-//                }
-//            }
-//        }
-//    }
 }

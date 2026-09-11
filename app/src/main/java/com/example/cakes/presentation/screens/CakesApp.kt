@@ -1,4 +1,4 @@
-package com.example.cakes.screens
+package com.example.cakes.presentation.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size

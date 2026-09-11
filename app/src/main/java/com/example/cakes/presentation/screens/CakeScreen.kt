@@ -1,4 +1,4 @@
-package com.example.cakes.screens
+package com.example.cakes.presentation.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -17,16 +17,16 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.cakes.presentation.screens.components.CakeCard
 import com.example.cakes.presentation.viewmodel.CakesViewModel
-import com.example.cakes.screens.components.CakeCard
 import com.example.cakes.ui.theme.CakeBackground
 import com.example.cakes.ui.theme.CakePeachBackground
 import com.example.cakes.ui.theme.CakeTypography
+import com.example.cakes.util.CakeConstants
 
 @Composable
 fun CakeScreen(
@@ -90,7 +90,7 @@ fun CakeTopBar() {
         ),
         title = {
             Text(
-                text = "Dream Cakes",
+                text = CakeConstants.APP_NAME,
                 style = CakeTypography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
