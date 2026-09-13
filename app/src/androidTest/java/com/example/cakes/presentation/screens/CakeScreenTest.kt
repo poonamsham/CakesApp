@@ -161,4 +161,51 @@ class CakeScreenTest {
         composeTestRule.onNodeWithText("Retry").performClick()
         assert(retryCalled.get())
     }
+
+    /**
+     * Verifies that an empty list is handled gracefully (LazyColumn remains empty).
+     */
+    @Test
+    fun cakeScreen_showsEmptyList_whenStateHasNoCakes() {
+        val state = CakeUiState(cakes = emptyList())
+
+        composeTestRule.setContent {
+            CakeScreenContent(
+                state = state,
+                onRefresh = {},
+                onRetry = {}
+            )
+        }
+
+        // Verify the app title is still there.
+        composeTestRule.onNodeWithText("Dream Cakes").assertIsDisplayed()
+        // No cake title should be found.
+        composeTestRule.onNodeWithText("Chocolate Cake").assertDoesNotExist()
+    }
+
+    /**
+     * Verifies that cakes are not visible immediately due to the entry animation stagger.
+     */
+    @Test
+    fun cakeScreen_cakesAreNotVisibleImmediately_dueToAnimation() {
+        val cakes = listOf(CakeModel("Delayed Cake", "Desc", "url"))
+        val state = CakeUiState(cakes = cakes)
+
+        composeTestRule.setContent {
+            CakeScreenContent(
+                state = state,
+                onRefresh = {},
+                onRetry = {}
+            )
+        }
+
+        // Should not be displayed instantly (animation delay is 60ms).
+        composeTestRule.onNodeWithText("Delayed Cake").assertDoesNotExist()
+        
+        // Wait for it to appear.
+        composeTestRule.waitUntil(1000) {
+            composeTestRule.onAllNodesWithText("Delayed Cake").fetchSemanticsNodes().isNotEmpty()
+        }
+        composeTestRule.onNodeWithText("Delayed Cake").assertIsDisplayed()
+    }
 }
