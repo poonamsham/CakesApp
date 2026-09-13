@@ -27,11 +27,18 @@ import coil3.compose.AsyncImage
 import com.example.cakes.data.model.CakeModel
 import com.example.cakes.R
 
+/**
+ * A card component that displays a cake's image and title.
+ * Clicking the card opens a detailed popup.
+ *
+ * @param cakeModel The [CakeModel] containing the cake's information.
+ */
 @Composable
 fun CakeCard(cakeModel: CakeModel) {
     var showPopup by remember {
         mutableStateOf(false)
     }
+    
     ElevatedCard(
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
@@ -44,13 +51,16 @@ fun CakeCard(cakeModel: CakeModel) {
         Box(
             modifier = Modifier.fillMaxSize()
         ) {
+            // Loads the cake image from the provided URL.
             AsyncImage(
                 model = cakeModel.image,
                 contentDescription = "Cake image",
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
-                error = painterResource(R.drawable.food)
+                error = painterResource(R.drawable.food) // Fallback image on error.
             )
+            
+            // Overlays the title at the bottom of the image.
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
@@ -64,6 +74,8 @@ fun CakeCard(cakeModel: CakeModel) {
                     fontWeight = FontWeight.Bold
                 )
             }
+            
+            // Displays the detailed popup when requested.
             if (showPopup) {
                 CakePopup(
                     cakeModel = cakeModel,

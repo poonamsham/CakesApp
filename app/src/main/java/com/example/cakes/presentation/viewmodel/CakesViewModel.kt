@@ -13,6 +13,12 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * ViewModel for managing the Cake catalog screen.
+ * Handles data fetching, error states, and user interactions like refresh and retry.
+ *
+ * @property repository The repository used to fetch cake data.
+ */
 @HiltViewModel
 class CakesViewModel @Inject constructor(
     private val repository: CakeRepository
@@ -21,13 +27,21 @@ class CakesViewModel @Inject constructor(
     private val _uiState =
         MutableStateFlow(CakeUiState(isLoading = true))
 
+    /**
+     * Observable [StateFlow] of the [CakeUiState].
+     */
     val uiState: StateFlow<CakeUiState> =
         _uiState.asStateFlow()
 
     init {
+        // Automatically fetch data on initialization.
         loadCakes()
     }
 
+    /**
+     * Internal helper to load cakes from the repository.
+     * Updates [uiState] with loading, success, or error status.
+     */
     private fun loadCakes() {
         viewModelScope.launch {
 
@@ -64,14 +78,21 @@ class CakesViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Re-triggers data loading when the user clicks the retry button in an error state.
+     */
     fun retry() {
         loadCakes()
     }
 
+    /**
+     * Performs a pull-to-refresh operation.
+     * Clears the current list and shows a refreshing indicator while fetching new data.
+     */
     fun refresh() {
         viewModelScope.launch {
 
-            // 1. Clear existing data immediately
+            // 1. Clear existing data immediately to show fresh load
             _uiState.update {
                 it.copy(
                     cakes = emptyList(),
