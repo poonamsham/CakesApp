@@ -1,5 +1,6 @@
 package com.example.cakes.di
 
+import android.util.Log
 import com.example.cakes.data.service.CakeApiService
 import com.example.cakes.util.CakeConstants
 import dagger.Module
@@ -19,7 +20,9 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideLoggingInterceptor(): HttpLoggingInterceptor {
-        return HttpLoggingInterceptor().apply {
+        return HttpLoggingInterceptor{message->
+            Log.d("NETWORK", message)
+        }.apply {
             level = HttpLoggingInterceptor.Level.BODY
         }
     }

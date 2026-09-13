@@ -1,8 +1,13 @@
+import io.gitlab.arturbosch.detekt.Detekt
+import org.jlleitschuh.gradle.ktlint.reporter.ReporterType
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     id("com.google.dagger.hilt.android")
+    alias(libs.plugins.detekt)
+    alias(libs.plugins.ktlint)
 }
 
 android {
@@ -43,6 +48,35 @@ android {
             excludes += "/META-INF/LICENSE-notice.md"
         }
     }
+
+    lint {
+        abortOnError = true
+        checkReleaseBuilds = true
+        warningsAsErrors = false
+        baseline = file("lint-baseline.xml")
+        disable += listOf("TypographyFractions", "TypographyQuotes")
+        enable += listOf("RtlHardcoded", "RtlCompat", "RtlEnabled")
+    }
+}
+
+tasks.withType<Detekt>().configureEach {
+    jvmTarget = "11"
+}
+
+detekt {
+    toolVersion = libs.versions.detekt.get()
+    config.setFrom(files("${rootProject.projectDir}/config/detekt/detekt.yml"))
+    baseline = file("${rootProject.projectDir}/config/detekt/baseline.xml")
+    buildUponDefaultConfig = true
+}
+
+ktlint {
+    android = true
+    ignoreFailures = false
+    reporters {
+        reporter(ReporterType.PLAIN)
+        reporter(ReporterType.CHECKSTYLE)
+    }
 }
 
 
@@ -57,7 +91,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.12.0")
+    implementation("androidx.compose.ui:ui-text-google-fonts:1.12.1")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
     implementation("androidx.compose.material:material:1.12.1")
@@ -67,6 +101,7 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.57.1")
     implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
     implementation("com.google.dagger:hilt-android:2.57.1")
+    implementation(libs.androidx.ui)
     ksp("com.google.dagger:hilt-android-compiler:2.57.1")
     implementation("io.coil-kt.coil3:coil-compose:3.3.0")
     implementation("io.coil-kt.coil3:coil-network-okhttp:3.3.0")

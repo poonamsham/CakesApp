@@ -1,5 +1,6 @@
 package com.example.cakes.presentation.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.cakes.data.model.CakeUiState
@@ -18,19 +19,65 @@ class CakesViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState =
-        MutableStateFlow(CakeUiState())
+        MutableStateFlow(CakeUiState(isLoading = true))
 
     val uiState: StateFlow<CakeUiState> =
         _uiState.asStateFlow()
 
     init {
-        refresh()
+        loadCakes()
+    }
+
+    private fun loadCakes() {
+        viewModelScope.launch {
+
+            _uiState.update {
+                it.copy(
+                    isLoading = true,
+                    error = null
+                )
+            }
+
+            try {
+                val cakes = repository.getCakes()
+                Log.d(
+                    "CakesViewModel",
+                    "getCakes -${cakes}",
+                )
+                _uiState.update {
+                    it.copy(
+                        cakes = cakes,
+                        isRefreshing = false,
+                        isLoading = false,
+                    )
+                }
+            } catch (e: Exception) {
+                Log.e(
+                    "CakesViewModel",
+                    "getCakes failed",
+                    e
+                )
+                _uiState.update {
+                    it.copy(isRefreshing = false, error = e.message, isLoading = false)
+                }
+            }
+        }
+    }
+
+    fun retry() {
+        loadCakes()
     }
 
     fun refresh() {
         viewModelScope.launch {
+
+            // 1. Clear existing data immediately
             _uiState.update {
-                it.copy(isRefreshing = true)
+                it.copy(
+                    cakes = emptyList(),
+                    isRefreshing = true,
+                    error = null
+                )
             }
 
             try {
