@@ -17,10 +17,12 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.cakes.data.model.CakeUiState
 import com.example.cakes.presentation.screens.components.CakeCard
 import com.example.cakes.presentation.viewmodel.CakesViewModel
 import com.example.cakes.ui.theme.CakeBackground
@@ -28,15 +30,29 @@ import com.example.cakes.ui.theme.CakePeachBackground
 import com.example.cakes.ui.theme.CakeTypography
 import com.example.cakes.util.CakeConstants
 
+const val PROGRESS_INDICATOR_TAG = "progress_indicator"
+
 @Composable
 fun CakeScreen(
     viewModel: CakesViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    CakeScreenContent(
+        state = state,
+        onRefresh = viewModel::refresh
+    )
+}
+
+@Composable
+fun CakeScreenContent(
+    state: CakeUiState,
+    onRefresh: () -> Unit
+) {
     when {
         state.isLoading -> {
-            // todo in cernter of the screen
-            CircularProgressIndicator()
+            CircularProgressIndicator(
+                modifier = Modifier.testTag(PROGRESS_INDICATOR_TAG)
+            )
         }
 
         state.error != null -> {
@@ -48,7 +64,7 @@ fun CakeScreen(
         else -> {
             PullToRefreshBox(
                 isRefreshing = state.isRefreshing,
-                onRefresh = viewModel::refresh,
+                onRefresh = onRefresh,
                 modifier = Modifier.fillMaxSize()
             ) {
                 Scaffold(
