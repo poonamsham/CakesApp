@@ -31,6 +31,12 @@ import com.example.cakes.data.model.CakeModel
 import com.example.cakes.ui.theme.CakeBackground
 import com.example.cakes.ui.theme.CakeTypography
 
+/**
+ * A full-screen dialog (popup) that shows high-resolution details of a cake.
+ *
+ * @param cakeModel The cake data to display.
+ * @param onDismiss Callback triggered to close the dialog.
+ */
 @Composable
 fun CakePopup(
     cakeModel: CakeModel,
@@ -40,7 +46,7 @@ fun CakePopup(
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(
-            usePlatformDefaultWidth = false
+            usePlatformDefaultWidth = false // Allows custom width constraints.
         )
     ) {
 
@@ -65,6 +71,7 @@ fun CakePopup(
                     modifier = Modifier.fillMaxSize()
                 ) {
 
+                    // Hero image section.
                     AsyncImage(
                         model = cakeModel.image,
                         contentDescription = "Cake image",
@@ -76,6 +83,8 @@ fun CakePopup(
                     Spacer(
                         modifier = Modifier.height(16.dp)
                     )
+                    
+                    // Detailed information section.
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -102,7 +111,7 @@ fun CakePopup(
                     }
                 }
 
-                // Close button
+                // Close button positioned at the top right.
                 IconButton(
                     onClick = onDismiss,
                     modifier = Modifier

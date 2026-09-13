@@ -8,6 +8,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.example.cakes.R
 
+/**
+ * Custom [FontFamily] definition using local resources.
+ */
 val Poppins = FontFamily(
     Font(
         R.font.robotoflex_static_regular,
@@ -22,6 +25,11 @@ val Poppins = FontFamily(
         FontWeight.Bold
     )
 )
+
+/**
+ * Custom typography settings for the Cake application.
+ * Overrides headline, title, body, and label styles with the custom font family and scale.
+ */
 val CakeTypography = Typography(
 
     headlineLarge = TextStyle(

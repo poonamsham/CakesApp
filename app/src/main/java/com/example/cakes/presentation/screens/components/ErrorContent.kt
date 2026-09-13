@@ -14,6 +14,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+/**
+ * Component displayed when an error occurs during data fetching.
+ *
+ * @param onRetry Callback to re-attempt the data fetch.
+ */
 @Composable
 fun ErrorContent(
     onRetry: () -> Unit
@@ -35,6 +40,7 @@ fun ErrorContent(
             modifier = Modifier.height(16.dp)
         )
 
+        // Retry button to allow user to recover from failures.
         Button(
             onClick = onRetry
 

@@ -14,6 +14,11 @@ import com.example.cakes.data.model.CakeModel
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
 
+/**
+ * Wrapper Composable that applies a fade-in and slide-up animation to a cake item when it enters the screen.
+ *
+ * @param cakeModel The cake data to display.
+ */
 @Composable
 fun AnimatedCakeItem(
     cakeModel: CakeModel,
@@ -22,8 +27,9 @@ fun AnimatedCakeItem(
         mutableStateOf(false)
     }
 
+    // Triggers the visibility change after a short delay to create a staggered effect.
     LaunchedEffect(cakeModel.title) {
-        delay(( 60L).milliseconds)
+        delay(60L.milliseconds)
         visible = true
     }
 

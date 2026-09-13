@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.CircularProgressIndicator
@@ -19,6 +20,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -32,8 +34,16 @@ import com.example.cakes.ui.theme.CakePeachBackground
 import com.example.cakes.ui.theme.CakeTypography
 import com.example.cakes.util.CakeConstants
 
+/**
+ * Test tag used to identify the progress indicator in UI tests.
+ */
 const val PROGRESS_INDICATOR_TAG = "progress_indicator"
 
+/**
+ * Main screen Composable that connects the ViewModel to the UI content.
+ *
+ * @param viewModel The [CakesViewModel] provided by Hilt.
+ */
 @Composable
 fun CakeScreen(
     viewModel: CakesViewModel = hiltViewModel()
@@ -46,45 +56,63 @@ fun CakeScreen(
     )
 }
 
+/**
+ * Stateless content of the Cake Screen, responsible for layout and state rendering.
+ *
+ * @param state The current [CakeUiState] to render.
+ * @param onRefresh Callback triggered when a pull-to-refresh is performed.
+ * @param onRetry Callback triggered when the retry button is clicked.
+ */
 @Composable
 fun CakeScreenContent(
     state: CakeUiState,
     onRefresh: () -> Unit,
     onRetry: () -> Unit
 ) {
-    when {
-        state.isLoading -> {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
+    Scaffold(
+        modifier = Modifier.background(CakeBackground),
+        topBar = {
+            CakeTopBar()
+        }
+    ) { paddingValues ->
+        when {
+            state.isLoading -> {
+                // Displays a loading spinner centered on the screen.
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                        .testTag(PROGRESS_INDICATOR_TAG),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
+                }
             }
-        }
 
-        state.error != null -> {
-            Log.d("Cake Screen", "Error: ${state.error}")
-            ErrorContent (
-                onRetry = onRetry
-            )
-        }
+            state.error != null -> {
+                // Displays an error message and a retry button.
+                Log.d("Cake Screen", "Error: ${state.error}")
+                Box(modifier = Modifier.padding(paddingValues)) {
+                    ErrorContent(
+                        onRetry = onRetry
+                    )
+                }
+            }
 
-        else -> {
-            PullToRefreshBox(
-                isRefreshing = state.isRefreshing,
-                onRefresh = onRefresh,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Scaffold(
-                    modifier = Modifier.background(CakeBackground),
-                    topBar = {
-                        CakeTopBar()
-                    }
-                ) { paddingValues ->
+            else -> {
+                // Displays the list of cakes with pull-to-refresh support.
+                PullToRefreshBox(
+                    isRefreshing = state.isRefreshing,
+                    onRefresh = onRefresh,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues)
+                ) {
                     LazyColumn(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
-                        contentPadding = paddingValues
+                        modifier = Modifier.fillMaxSize()
                     ) {
+                        // Filters out duplicates by title (case-insensitive) and sorts alphabetically.
                         val processedCakes = state.cakes
                             .distinctBy { it.title.lowercase() }
                             .sortedBy { it.title.lowercase() }
@@ -94,8 +122,9 @@ fun CakeScreenContent(
                             key = { _, movie -> movie.title }
                         ) { _, cake ->
 
+                            // Renders each cake with an entry animation.
                             AnimatedCakeItem(
-                                cakeModel= cake,
+                                cakeModel = cake,
                             )
                         }
 
@@ -106,6 +135,9 @@ fun CakeScreenContent(
     }
 }
 
+/**
+ * Custom TopAppBar for the Cake Screen.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CakeTopBar() {
