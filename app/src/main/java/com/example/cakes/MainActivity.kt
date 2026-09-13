@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
-import com.example.cakes.screens.CakeApp
+import com.example.cakes.presentation.screens.CakeApp
 import com.example.cakes.ui.theme.CakeTheme
 import dagger.hilt.android.AndroidEntryPoint
 

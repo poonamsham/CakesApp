@@ -1,9 +1,8 @@
-package com.example.cakes.screens.components
+package com.example.cakes.presentation.screens.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,7 +29,6 @@ import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
 import com.example.cakes.data.model.CakeModel
 import com.example.cakes.ui.theme.CakeBackground
-import com.example.cakes.ui.theme.CakePeachBackground
 import com.example.cakes.ui.theme.CakeTypography
 
 @Composable
@@ -82,12 +80,12 @@ fun CakePopup(
                         modifier = Modifier
                             .fillMaxWidth()
                             .weight(0.35f)
-                            .padding(24.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
+                            .padding(horizontal = 24.dp).align(Alignment.Start),
                     ) {
 
                         Text(
                             text = cakeModel.title,
+                            textAlign = TextAlign.Start,
                             style = CakeTypography.headlineMedium,
                             fontWeight = FontWeight.Bold
                         )
@@ -98,7 +96,7 @@ fun CakePopup(
                         Text(
                             text = cakeModel.desc,
                             style = CakeTypography.bodyLarge,
-                            textAlign = TextAlign.Center,
+                            textAlign = TextAlign.Start,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }

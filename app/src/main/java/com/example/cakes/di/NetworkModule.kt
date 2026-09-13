@@ -1,6 +1,7 @@
 package com.example.cakes.di
 
 import com.example.cakes.data.service.CakeApiService
+import com.example.cakes.util.CakeConstants
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -14,9 +15,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
-
-    private const val BASE_URL =
-        "https://raw.githubusercontent.com/"
 
     @Provides
     @Singleton
@@ -42,7 +40,7 @@ object NetworkModule {
         okHttpClient: OkHttpClient
     ): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(BASE_URL)
+            .baseUrl(CakeConstants.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

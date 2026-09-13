@@ -1,4 +1,4 @@
-package com.example.cakes.screens.components
+package com.example.cakes.presentation.screens.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,7 +36,7 @@ fun CakeCard(cakeModel: CakeModel) {
         elevation = CardDefaults.cardElevation(
             defaultElevation = 6.dp
         ),
-        modifier = Modifier.fillMaxWidth().height(300.dp),
+        modifier = Modifier.fillMaxWidth().height(300.dp).padding(16.dp),
         onClick = {
             showPopup = true
         }
