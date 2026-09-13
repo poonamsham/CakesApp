@@ -8,6 +8,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     alias(libs.plugins.detekt)
     alias(libs.plugins.ktlint)
+    id("jacoco")
 }
 
 android {
@@ -27,6 +28,10 @@ android {
     }
 
     buildTypes {
+        debug {
+            enableUnitTestCoverage = true
+            enableAndroidTestCoverage = true
+        }
         release {
             optimization {
                 enable = false
@@ -77,6 +82,38 @@ ktlint {
         reporter(ReporterType.PLAIN)
         reporter(ReporterType.CHECKSTYLE)
     }
+}
+
+configure<JacocoPluginExtension> {
+    toolVersion = "0.8.12"
+}
+
+tasks.register<JacocoReport>("jacocoTestReport") {
+    dependsOn(tasks.matching { it.name == "testDebugUnitTest" || it.name == "connectedDebugAndroidTest" })
+
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+
+    val fileFilter = listOf(
+        "**/R.class", "**/R$*.class", "**/BuildConfig.*", "**/Manifest*.*",
+        "**/*Test*.*", "android/**/*.*", "**/*_HiltModules*", "**/*_Factory*",
+        "**/*_MembersInjector*", "**/*Module_*", "com/example/cakes/ui/theme/**"
+    )
+
+    val debugTree = fileTree("${layout.buildDirectory.get()}/intermediates/built_in_kotlinc/debug/compileDebugKotlin/classes") {
+        exclude(fileFilter)
+    }
+
+    val mainSrc = "${project.projectDir}/src/main/java"
+
+    sourceDirectories.setFrom(files(mainSrc))
+    classDirectories.setFrom(files(debugTree))
+    executionData.setFrom(fileTree(layout.buildDirectory.get()) {
+        include("outputs/unit_test_code_coverage/debugUnitTest/testDebugUnitTest.exec")
+        include("outputs/code_coverage/debugAndroidTest/connected/**/*.ec")
+    })
 }
 
 
