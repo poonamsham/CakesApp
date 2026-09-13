@@ -1,13 +1,14 @@
 package com.example.cakes.presentation.screens
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Divider
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -16,14 +17,15 @@ import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.cakes.data.model.CakeUiState
-import com.example.cakes.presentation.screens.components.CakeCard
+import com.example.cakes.presentation.screens.components.AnimatedCakeItem
+import com.example.cakes.presentation.screens.components.ErrorContent
 import com.example.cakes.presentation.viewmodel.CakesViewModel
 import com.example.cakes.ui.theme.CakeBackground
 import com.example.cakes.ui.theme.CakePeachBackground
@@ -39,25 +41,31 @@ fun CakeScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     CakeScreenContent(
         state = state,
-        onRefresh = viewModel::refresh
+        onRefresh = viewModel::refresh,
+        onRetry = viewModel::retry
     )
 }
 
 @Composable
 fun CakeScreenContent(
     state: CakeUiState,
-    onRefresh: () -> Unit
+    onRefresh: () -> Unit,
+    onRetry: () -> Unit
 ) {
     when {
         state.isLoading -> {
-            CircularProgressIndicator(
-                modifier = Modifier.testTag(PROGRESS_INDICATOR_TAG)
-            )
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
         }
 
         state.error != null -> {
-            Text(
-                text = state.error ?: "Something went wrong"
+            Log.d("Cake Screen", "Error: ${state.error}")
+            ErrorContent (
+                onRetry = onRetry
             )
         }
 
@@ -80,9 +88,15 @@ fun CakeScreenContent(
                         val processedCakes = state.cakes
                             .distinctBy { it.title.lowercase() }
                             .sortedBy { it.title.lowercase() }
-                        items(processedCakes) { cake ->
-                            CakeCard(cake)
-                            Divider()
+
+                        itemsIndexed(
+                            items = processedCakes,
+                            key = { _, movie -> movie.title }
+                        ) { _, cake ->
+
+                            AnimatedCakeItem(
+                                cakeModel= cake,
+                            )
                         }
 
                     }

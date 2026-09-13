@@ -1,0 +1,37 @@
+build:
+  maxIssues: 0
+  excludeCorrectable: false
+  weights:
+    # complexity: 2
+    # LongParameterList: 1
+    # style: 1
+    # comments: 1
+
+complexity:
+  active: true
+  LongMethod:
+    active: true
+    threshold: 60
+  LongParameterList:
+    active: true
+    functionThreshold: 6
+    constructorThreshold: 7
+  LargeClass:
+    active: true
+    threshold: 600
+
+style:
+  active: true
+  MagicNumber:
+    active: true
+    excludes: ['1', '2', '100']
+  UnusedPrivateMember:
+    active: true
+  WildcardImport:
+    active: false
+
+naming:
+  active: true
+  FunctionNaming:
+    active: true
+    functionPattern: '^([a-z][a-zA-Z0-9]*)|(`.*`)$'
