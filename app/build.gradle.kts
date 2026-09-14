@@ -24,6 +24,15 @@ android {
         versionCode = 1
         versionName = "1.0"
 
+        buildFeatures {
+            buildConfig = true
+        }
+// product flavors can be added here for diffrent environments
+        buildConfigField(
+            "String",
+            "BASE_URL",
+            "\"https://raw.githubusercontent.com/\"" // keeping same
+        )
         testInstrumentationRunner = "com.example.cakes.HiltTestRunner"
     }
 
@@ -44,6 +53,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     packaging {
@@ -67,7 +77,18 @@ android {
 tasks.withType<Detekt>().configureEach {
     jvmTarget = "11"
 }
+tasks.register<JacocoCoverageVerification>("jacocoCoverageVerification") {
 
+    dependsOn("jacocoTestReport")
+
+    violationRules {
+        rule {
+            limit {
+                minimum = "0.0".toBigDecimal()
+            }
+        }
+    }
+}
 detekt {
     toolVersion = libs.versions.detekt.get()
     config.setFrom(files("${rootProject.projectDir}/config/detekt/detekt.yml"))
@@ -128,7 +149,6 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation("androidx.compose.ui:ui-text-google-fonts:1.12.1")
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:3.0.0")
     implementation("androidx.compose.material:material:1.12.1")

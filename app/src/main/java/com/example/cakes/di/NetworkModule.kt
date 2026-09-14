@@ -1,8 +1,8 @@
 package com.example.cakes.di
 
 import android.util.Log
+import com.example.cakes.BuildConfig
 import com.example.cakes.data.service.CakeApiService
-import com.example.cakes.util.CakeConstants
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -55,7 +55,7 @@ object NetworkModule {
         okHttpClient: OkHttpClient
     ): Retrofit {
         return Retrofit.Builder()
-            .baseUrl(CakeConstants.BASE_URL)
+            .baseUrl(BuildConfig.BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

@@ -10,7 +10,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -18,7 +18,6 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * Unit tests for [CakesViewModel].
@@ -29,39 +28,36 @@ class CakesViewModelTest {
 
     /**
      * Rule to override the Main dispatcher with a test dispatcher.
+     * Uses StandardTestDispatcher for controlled execution.
      */
     @get:Rule
     val mainDispatcherRule = MainDispatcherRule()
 
-    private val repository: CakeRepository = mockk()
+    private lateinit var repository: CakeRepository
 
     @Before
     fun setUp() {
-        // Mocking Android Log class to avoid "Method not mocked" errors.
+        repository = mockk()
         mockkStatic(Log::class)
         every { Log.d(any(), any()) } returns 0
         every { Log.e(any(), any(), any()) } returns 0
     }
 
-    /**
-     * Verifies that the ViewModel correctly fetches data on initialization.
-     */
     @Test
     fun `initial load updates cakes and sets isLoading to false`() = runTest {
         val cakes = listOf(CakeModel("Cake 1", "Desc 1", "Image 1"))
-        coEvery { repository.getCakes() } coAnswers {
-            delay(10.milliseconds)
-            cakes
-        }
+        coEvery { repository.getCakes() } returns cakes
 
         val viewModel = CakesViewModel(repository)
 
         viewModel.uiState.test {
-            // Check initial loading state.
+            // First item is initial state from MutableStateFlow constructor
             val state1 = awaitItem()
             assertTrue(state1.isLoading)
 
-            // Check success state after loading completes.
+            // runCurrent() will execute the loadCakes coroutine
+            runCurrent()
+
             val state2 = awaitItem()
             assertEquals(cakes, state2.cakes)
             assertFalse(state2.isLoading)
@@ -70,81 +66,59 @@ class CakesViewModelTest {
         }
     }
 
-    /**
-     * Verifies that the pull-to-refresh operation correctly updates the UI state.
-     */
     @Test
     fun `refresh updates cakes and toggles isRefreshing`() = runTest {
         val cakes1 = listOf(CakeModel("Cake 1", "Desc 1", "Image 1"))
         val cakes2 = listOf(CakeModel("Cake 2", "Desc 2", "Image 2"))
         
-        var callCount = 0
-        coEvery { repository.getCakes() } coAnswers {
-            callCount++
-            if (callCount == 1) {
-                cakes1
-            } else {
-                delay(10.milliseconds)
-                cakes2
-            }
-        }
+        coEvery { repository.getCakes() } returns cakes1 andThen cakes2
 
         val viewModel = CakesViewModel(repository)
 
         viewModel.uiState.test {
-            // Verify initial load.
-            val firstState = awaitItem()
-            val state1 = if (firstState.isLoading) awaitItem() else firstState
-            assertEquals(cakes1, state1.cakes)
+            awaitItem() // initial
+            runCurrent()
+            assertEquals(cakes1, awaitItem().cakes)
 
-            // Perform refresh.
             viewModel.refresh()
             
-            // Check intermediate refreshing state.
+            // First emission from refresh: isRefreshing = true
             val refreshingState = awaitItem()
             assertTrue(refreshingState.isRefreshing)
+            assertTrue(refreshingState.cakes.isEmpty())
 
-            // Check final success state.
-            val state2 = awaitItem()
-            assertEquals(cakes2, state2.cakes)
-            assertFalse(state2.isRefreshing)
+            // Execute the rest of refresh
+            runCurrent()
+
+            val successState = awaitItem()
+            assertEquals(cakes2, successState.cakes)
+            assertFalse(successState.isRefreshing)
             
             cancelAndIgnoreRemainingEvents()
         }
     }
 
-    /**
-     * Verifies that the retry operation correctly re-triggers data loading.
-     */
     @Test
     fun `retry calls loadCakes again`() = runTest {
         val cakes = listOf(CakeModel("Cake 1", "Desc 1", "Image 1"))
-        var callCount = 0
-        coEvery { repository.getCakes() } coAnswers {
-            callCount++
-            if (callCount == 1) throw Exception("Error")
-            else {
-                delay(10.milliseconds)
-                cakes
-            }
-        }
+        coEvery { repository.getCakes() } throws Exception("Error") andThen cakes
 
         val viewModel = CakesViewModel(repository)
 
         viewModel.uiState.test {
-            // Capture initial load failure.
-            val firstState = awaitItem()
-            val errorState = if (firstState.isLoading) awaitItem() else firstState
+            awaitItem() // initial
+            runCurrent()
+            val errorState = awaitItem()
             assertEquals("Error", errorState.error)
 
-            // Trigger retry.
             viewModel.retry()
             
-            // Check loading state from retry.
+            // First emission from retry: isLoading = true
             val loadingState = awaitItem()
             assertTrue(loadingState.isLoading)
 
-            // Check final success state.
+            runCurrent()
+
             val successState = awaitItem()
             assertEquals(cakes, successState.cakes)
             assertFalse(successState.isLoading)
@@ -153,22 +127,65 @@ class CakesViewModelTest {
         }
     }
 
-    /**
-     * Verifies that the ViewModel handles repository errors correctly.
-     */
     @Test
     fun `loadCakes sets error on failure`() = runTest {
-        coEvery { repository.getCakes() } coAnswers {
-            throw Exception("Network error")
-        }
+        coEvery { repository.getCakes() } throws Exception("Network error")
 
         val viewModel = CakesViewModel(repository)
 
         viewModel.uiState.test {
-            val firstState = awaitItem()
-            val state = if (firstState.isLoading) awaitItem() else firstState
+            awaitItem() // initial
+            runCurrent()
+            val state = awaitItem()
             assertEquals("Network error", state.error)
             assertFalse(state.isLoading)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `refresh sets isRefreshing to false on failure`() = runTest {
+        coEvery { repository.getCakes() } returns emptyList() andThenThrows Exception("Refresh failed")
+
+        val viewModel = CakesViewModel(repository)
+
+        viewModel.uiState.test {
+            awaitItem() // initial
+            runCurrent()
+            awaitItem() // success empty
+
+            viewModel.refresh()
+
+            assertTrue(awaitItem().isRefreshing)
+
+            runCurrent()
+
+            val finalState = awaitItem()
+            assertFalse(finalState.isRefreshing)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `retry sets error on failure`() = runTest {
+        coEvery { repository.getCakes() } throws Exception("First error") andThenThrows Exception("Retry error")
+
+        val viewModel = CakesViewModel(repository)
+
+        viewModel.uiState.test {
+            awaitItem() // initial
+            runCurrent()
+            assertEquals("First error", awaitItem().error)
+
+            viewModel.retry()
+
+            assertTrue(awaitItem().isLoading)
+
+            runCurrent()
+
+            val finalState = awaitItem()
+            assertEquals("Retry error", finalState.error)
+            assertFalse(finalState.isLoading)
             cancelAndIgnoreRemainingEvents()
         }
     }

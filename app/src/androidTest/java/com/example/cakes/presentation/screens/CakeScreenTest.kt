@@ -208,4 +208,23 @@ class CakeScreenTest {
         }
         composeTestRule.onNodeWithText("Delayed Cake").assertIsDisplayed()
     }
+
+    /**
+     * Verifies that the refreshing state is handled gracefully.
+     */
+    @Test
+    fun cakeScreen_showsRefreshing_whenStateIsRefreshing() {
+        val state = CakeUiState(isRefreshing = true)
+
+        composeTestRule.setContent {
+            CakeScreenContent(
+                state = state,
+                onRefresh = {},
+                onRetry = {}
+            )
+        }
+
+        // Content should still be visible (TopBar).
+        composeTestRule.onNodeWithText("Dream Cakes").assertIsDisplayed()
+    }
 }

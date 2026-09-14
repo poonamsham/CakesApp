@@ -3,6 +3,7 @@ package com.example.cakes.presentation.screens.components
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
 import com.example.cakes.data.model.CakeModel
 import org.junit.Rule
@@ -42,8 +43,8 @@ class CakePopupTest {
             CakePopup(cakeModel = cake, onDismiss = { dismissCalled.set(true) })
         }
 
-        // "×" is the text used for the close button.
-        composeTestRule.onNodeWithText("×").performClick()
+        // The close button now uses an Image with content description "Close"
+        composeTestRule.onNodeWithContentDescription("Close").performClick()
 
         assert(dismissCalled.get())
     }
