@@ -1,5 +1,6 @@
 package com.example.cakes.presentation.screens.components
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,7 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -21,12 +22,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import coil3.compose.AsyncImage
+import com.example.cakes.R
 import com.example.cakes.data.model.CakeModel
 import com.example.cakes.ui.theme.CakeBackground
 import com.example.cakes.ui.theme.CakeTypography
@@ -78,12 +81,13 @@ fun CakePopup(
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .weight(0.5f)
+                            .weight(0.5f),
+                        error = painterResource(R.drawable.food)
                     )
                     Spacer(
                         modifier = Modifier.height(16.dp)
                     )
-                    
+
                     // Detailed information section.
                     Column(
                         modifier = Modifier
@@ -117,15 +121,17 @@ fun CakePopup(
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(12.dp)
-                        .background(
-                            color = Color.Transparent,
-                            shape = CircleShape
-                        )
+
                 ) {
-                    Text(
-                        text = "×",
-                        style = MaterialTheme.typography.headlineMedium,
-                        fontWeight = FontWeight.Bold
+                    Image(
+                        painter = painterResource(
+                            id = R.drawable.outline_close_24
+                        ),
+
+                        contentDescription = "Close",
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .size(20.dp).background(Color.Transparent)
                     )
                 }
             }

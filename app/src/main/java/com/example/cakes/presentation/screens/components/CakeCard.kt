@@ -1,5 +1,6 @@
 package com.example.cakes.presentation.screens.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -54,12 +56,26 @@ fun CakeCard(cakeModel: CakeModel) {
             // Loads the cake image from the provided URL.
             AsyncImage(
                 model = cakeModel.image,
-                contentDescription = "Cake image",
+                contentDescription = "Cake image ${cakeModel.title}",
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop,
                 error = painterResource(R.drawable.food) // Fallback image on error.
             )
-            
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(110.dp)
+                    .align(Alignment.BottomCenter)
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Transparent,
+                                Color.Black.copy(alpha = 0.65f)
+                            )
+                        )
+                    )
+            )
             // Overlays the title at the bottom of the image.
             Column(
                 modifier = Modifier
