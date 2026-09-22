@@ -10,15 +10,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Colors
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
@@ -39,7 +35,6 @@ import com.example.cakes.presentation.screens.components.AnimatedCakeItem
 import com.example.cakes.presentation.screens.components.ErrorContent
 import com.example.cakes.presentation.viewmodel.CakesViewModel
 import com.example.cakes.ui.theme.CakeBackground
-import com.example.cakes.ui.theme.CakeCoralDark
 import com.example.cakes.ui.theme.CakePeachBackground
 import com.example.cakes.ui.theme.CakeTypography
 import com.example.cakes.util.CakeConstants
@@ -126,13 +121,9 @@ fun CakeScreenContent(
                         verticalArrangement = Arrangement.spacedBy(16.dp),
                         modifier = Modifier.fillMaxSize()
                     ) {
-                        // Filters out duplicates by title (case-insensitive) and sorts alphabetically.
-                        val processedCakes = state.cakes
-                            .distinctBy { it.title.lowercase() }
-                            .sortedBy { it.title.lowercase() }
 
                         itemsIndexed(
-                            items = processedCakes,
+                            items = state.cakes,
                             key = { _, movie -> movie.title }
                         ) { _, cake ->
 

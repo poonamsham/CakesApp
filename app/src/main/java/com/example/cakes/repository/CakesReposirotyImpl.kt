@@ -21,7 +21,13 @@ class CakeRepositoryImpl @Inject constructor(
     override suspend fun getCakes(): List<CakeModel> {
         val cakeList = apiService.getCakes()
         Log.d("CakeRepositoryImpl", "response = $cakeList")
-        return cakeList
+
+        // Filters out duplicates by title (case-insensitive) and sorts alphabetically.
+
+        val processedCakes = cakeList
+            .distinctBy { it.title.lowercase() }
+            .sortedBy { it.title.lowercase() }
+        return processedCakes
     }
 
 }
