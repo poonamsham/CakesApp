@@ -9,7 +9,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
@@ -28,8 +27,10 @@ class CakesViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _uiState =
-        MutableStateFlow(CakeUiState(isLoading = true))
-    val uiState: StateFlow<CakeUiState> = _uiState.asStateFlow()
+        MutableStateFlow<CakeUiState>(CakeUiState.Loading)
+
+    val uiState: StateFlow<CakeUiState> =
+        _uiState.asStateFlow()
 
     private var loadJob: Job? = null
 
@@ -38,92 +39,99 @@ class CakesViewModel @Inject constructor(
     }
 
     fun retry() {
-        loadCakes(isRefresh = false)
+        loadCakes()
     }
 
-    fun refresh() {
-        loadCakes(isRefresh = true)
-    }
-
-    fun clearRefreshError() {
-        _uiState.update {
-            it.copy(refreshError = null)
-        }
-    }
-
-    private fun loadCakes(isRefresh: Boolean = false) {
+    fun loadCakes() {
         loadJob?.cancel()
 
         loadJob = viewModelScope.launch {
 
-            _uiState.update { currentState ->
-                if (isRefresh) {
-                    currentState.copy(
-                        isRefreshing = true,
-                        refreshError = null
-                    )
-                } else {
-                    currentState.copy(
-                        isLoading = true,
-                        error = null
-                    )
-                }
-            }
+            _uiState.value = CakeUiState.Loading
 
             try {
                 val cakes = repository.getCakes()
 
-                _uiState.update {
-                    it.copy(
-                        cakes = cakes,
-                        isLoading = false,
-                        isRefreshing = false,
-                        error = null,
-                        refreshError = null
-                    )
-                }
+                _uiState.value =
+                    if (cakes.isEmpty()) {
+                        CakeUiState.Empty
+                    } else {
+                        CakeUiState.Content(
+                            cakes = cakes
+                        )
+                    }
 
             } catch (e: CancellationException) {
-                // Cancellation is part of normal coroutine behaviour.
                 throw e
 
             } catch (e: IOException) {
-                handleError(
-                    isRefresh = isRefresh,
-                    message = e.message ?: "Unable to connect. Check your internet connection."
+                _uiState.value = CakeUiState.Error(
+                    message = "Please check your internet connection"
                 )
 
             } catch (e: HttpException) {
-                handleError(
-                    isRefresh = isRefresh,
-                    message = e.message ?: "Server error. Please try again."
+                _uiState.value = CakeUiState.Error(
+                    message = "Server error. Please try again."
                 )
 
             } catch (e: Exception) {
-                handleError(
-                    isRefresh = isRefresh,
-                    message = e.message ?: "Something went wrong. Please try again."
+                _uiState.value = CakeUiState.Error(
+                    message = "Something went wrong"
                 )
             }
         }
     }
 
-    private fun handleError(
-        isRefresh: Boolean,
-        message: String
-    ) {
-        _uiState.update { currentState ->
+    fun refresh() {
 
-            if (isRefresh) {
-                // Keep existing cakes visible.
-                currentState.copy(
+        val currentState = _uiState.value
+
+        if (currentState !is CakeUiState.Content) {
+            loadCakes()
+            return
+        }
+
+        loadJob?.cancel()
+
+        loadJob = viewModelScope.launch {
+
+            _uiState.value = currentState.copy(
+                isRefreshing = true,
+                refreshError = null
+            )
+
+            try {
+                val cakes = repository.getCakes()
+
+                _uiState.value =
+                    if (cakes.isEmpty()) {
+                        CakeUiState.Empty
+                    } else {
+                        CakeUiState.Content(
+                            cakes = cakes,
+                            isRefreshing = false
+                        )
+                    }
+
+            } catch (e: CancellationException) {
+                throw e
+
+            } catch (e: IOException) {
+                _uiState.value = currentState.copy(
                     isRefreshing = false,
-                    refreshError = message
+                    refreshError = "Please check your internet connection"
                 )
-            } else {
-                currentState.copy(
-                    isLoading = false,
-                    error = message
+
+            } catch (e: HttpException) {
+                _uiState.value = currentState.copy(
+                    isRefreshing = false,
+                    refreshError = "Unable to refresh cakes"
+                )
+
+            } catch (e: Exception) {
+                _uiState.value = currentState.copy(
+                    isRefreshing = false,
+                    refreshError = "Something went wrong"
                 )
             }
         }

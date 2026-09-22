@@ -86,8 +86,8 @@ fun CakeScreenContent(
             CakeTopBar()
         }
     ) { paddingValues ->
-        when {
-            state.isLoading -> {
+        when(state) {
+            CakeUiState.Loading -> {
                 // Displays a loading spinner centered on the screen.
                 Box(
                     modifier = Modifier
@@ -100,17 +100,20 @@ fun CakeScreenContent(
                 }
             }
 
-            state.error != null -> {
+           is CakeUiState.Error -> {
                 // Displays an error message and a retry button.
-                Log.d("Cake Screen", "Error: ${state.error}")
+                Log.d("Cake Screen", "Error: ${state.message}")
                 Box(modifier = Modifier.padding(paddingValues)) {
                     ErrorContent(
                         onRetry = onRetry
                     )
                 }
             }
+            CakeUiState.Empty -> {
+                Text("No cakes available")
+            }
 
-            else -> {
+            is CakeUiState.Content -> {
                 // Displays the list of cakes with pull-to-refresh support.
                 PullToRefreshBox(
                     isRefreshing = state.isRefreshing,

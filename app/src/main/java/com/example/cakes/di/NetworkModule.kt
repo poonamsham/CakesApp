@@ -29,7 +29,7 @@ object NetworkModule {
         return HttpLoggingInterceptor { message ->
             Log.d("NETWORK", message)
         }.apply {
-            if (BuildConfig.DEBUG) {
+            level = if (BuildConfig.DEBUG) {
                 HttpLoggingInterceptor.Level.BODY
             } else {
                 HttpLoggingInterceptor.Level.NONE
