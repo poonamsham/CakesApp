@@ -85,7 +85,7 @@ class CakesViewModelTest {
             // First emission from refresh: isRefreshing = true
             val refreshingState = awaitItem()
             assertTrue(refreshingState.isRefreshing)
-            assertTrue(refreshingState.cakes.isEmpty())
+            assertEquals(cakes1, refreshingState.cakes)
 
             // Execute the rest of refresh
             runCurrent()

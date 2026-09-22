@@ -19,6 +19,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -72,6 +73,7 @@ fun CakeScreen(
  * @param onRefresh Callback triggered when a pull-to-refresh is performed.
  * @param onRetry Callback triggered when the retry button is clicked.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CakeScreenContent(
     state: CakeUiState,
@@ -151,13 +153,12 @@ fun CakeScreenContent(
 @Composable
 fun CakeTopBar() {
     TopAppBar(
-        colors = TopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = CakePeachBackground,
             scrolledContainerColor = CakePeachBackground,
             navigationIconContentColor = Color.Black,
             titleContentColor = CakeBackground,
-            actionIconContentColor = Color.Black,
-            subtitleContentColor = Color.Black,
+            actionIconContentColor = Color.Black
         ),
         title = {
             Text(

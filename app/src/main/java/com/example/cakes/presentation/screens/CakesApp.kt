@@ -9,7 +9,5 @@ import com.example.cakes.ui.theme.CakeTheme
  */
 @Composable
 fun CakeApp() {
-    CakeTheme {
         CakeScreen()
-    }
 }
